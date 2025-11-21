@@ -1,2 +1,0 @@
-# khumotone
-Site Da Khumotone
