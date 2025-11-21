@@ -1,0 +1,1733 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Contracts - KHUMOTONE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<link rel="shortcut icon" href="favicon.png" type="image/x-icon">
+<link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+      
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<style>
+
+[x-cloak] { display: none !important; }
+      
+body {
+    font-family: 'Lato', sans-serif;
+}
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+}
+.font-display {
+    font-family: 'Manrope', 'Noto Sans', sans-serif;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.nav-link {
+  color: inherit;
+  transition: color 0.3s ease;
+}
+.nav-link:hover {
+  color: #0072FF !important;
+}
+
+@media (max-width: 768px) {
+  #mobile-menu.show {
+    display: flex !important;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tab-content {
+  display: none;
+}
+.tab-content.active {
+  display: block;
+}
+
+/* Estilos para badges de status dos documentos */
+.available-badge {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    background: rgba(34, 197, 94, 0.1);
+    border-radius: 4px;
+    font-weight: 600;
+    color: #16a34a;
+}
+
+.unavailable-badge {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    background: rgba(100, 116, 139, 0.1);
+    border-radius: 4px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.document-status {
+    transition: all 0.3s ease;
+}
+
+.document-status.available {
+    background: rgba(34, 197, 94, 0.05);
+    border-left: 4px solid #16a34a;
+}
+
+.document-status.unavailable {
+    background: rgba(100, 116, 139, 0.05);
+    border-left: 4px solid #64748b;
+}
+</style>
+
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "primary": "#0072FF",
+        "background-light": "#f8f7f6",
+        "background-dark": "#333333",
+        "copper": "#0072FF",
+        "metal-dark": "#333333",
+        "off-white": "#fafafa",
+        "grey-light": "#E0E0E0",
+        "text-light": "#1b140d",
+        "text-dark": "#E0E0E0",
+        "text-muted-light": "#333333",
+        "text-muted-dark": "#a1a1aa"
+      },
+      fontFamily: {
+        "display": ["Manrope", "sans-serif"],
+        "serif": ["Playfair Display", "serif"]
+      },
+      borderRadius: {
+        "DEFAULT": "0.5rem",
+        "lg": "0.75rem",
+        "xl": "1rem",
+        "full": "9999px"
+      },
+    },
+  },
+}
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.getElementById("menu-toggle");
+  const mobileMenu = document.getElementById("mobile-menu");
+  toggle.addEventListener("click", () => {
+    mobileMenu.classList.toggle("show");
+  });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const wechatBtn = document.getElementById('wechat-btn');
+  const wechatPopup = document.getElementById('wechat-popup');
+
+  wechatBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isHidden = wechatPopup.classList.contains('hidden');
+    document.querySelectorAll('#wechat-popup').forEach(p => p.classList.add('hidden', 'opacity-0', 'scale-95'));
+    if (isHidden) {
+      wechatPopup.classList.remove('hidden');
+      setTimeout(() => {
+        wechatPopup.classList.remove('opacity-0', 'scale-95');
+      }, 10);
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!wechatBtn.contains(e.target) && !wechatPopup.contains(e.target)) {
+      wechatPopup.classList.add('opacity-0', 'scale-95');
+      setTimeout(() => {
+        wechatPopup.classList.add('hidden');
+      }, 200);
+    }
+  });
+});
+</script>
+
+<script>
+// Função principal para download de documentos
+function downloadDocument(documentType) {
+    // Buscar documento do localStorage
+    const savedDoc = localStorage.getItem(`khumotone_document_${documentType}`);
+    
+    if (savedDoc) {
+        try {
+            const docData = JSON.parse(savedDoc);
+            
+            // Converter base64 para blob
+            const byteCharacters = atob(docData.data.split(',')[1]);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: docData.type });
+            
+            // Criar link de download
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = docData.name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            console.log(`Documento ${docData.name} baixado com sucesso`);
+            
+            
+            
+        } catch (error) {
+            console.error('Erro ao processar documento:', error);
+            showDownloadStatus('❌ Erro ao baixar o documento. Tente novamente.', 'error');
+        }
+    } else {
+        showDownloadStatus('📝 Documento não encontrado. Entre em contato conosco para mais informações.', 'info');
+    }
+}
+
+// Função para mostrar status do download
+function showDownloadStatus(message, type) {
+    // Criar ou reutilizar elemento de status
+    let statusDiv = document.getElementById('downloadStatus');
+    if (!statusDiv) {
+        statusDiv = document.createElement('div');
+        statusDiv.id = 'downloadStatus';
+        statusDiv.className = 'fixed top-4 right-4 z-50 max-w-sm';
+        document.body.appendChild(statusDiv);
+    }
+    
+    const bgColor = type === 'success' ? 'bg-green-500' : 
+                   type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+    
+    statusDiv.innerHTML = `
+        <div class="${bgColor} text-white p-4 rounded-lg shadow-lg flex items-center gap-3 animate-fade-in">
+            <span class="material-symbols-outlined">
+                ${type === 'success' ? 'check_circle' : 
+                  type === 'error' ? 'error' : 'info'}
+            </span>
+            <span class="flex-1">${message}</span>
+            <button onclick="this.parentElement.remove()" class="text-white hover:text-gray-200">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+    `;
+    
+    // Auto-remover após 5 segundos
+    setTimeout(() => {
+        if (statusDiv && statusDiv.parentElement) {
+            statusDiv.remove();
+        }
+    }, 5000);
+}
+
+// Função para verificar e atualizar a interface dos documentos
+function updateDocumentInterface() {
+    const documentIds = [
+        'business-plan-executive', 'market-analysis', 'expansion-strategy', 'financial-projections', 'risk-assessment',
+        'operational-procedure', 'quality-control', 'safety-protocols', 'logistics-process', 'compliance-procedure',
+        'letter-intent', 'loi-guidelines', 'nda-template', 'term-sheet', 'due-diligence',
+        'full-corporate-offer', 'fco-guidelines', 'product-specs', 'pricing-structure', 'delivery-terms',
+        'sales-purchase-agreement', 'spa-guidelines', 'payment-terms', 'warranty-terms', 'dispute-resolution',
+        'copper-specs', 'copper-applications', 'copper-standards', 'copper-handling', 'copper-certification',
+        'cobalt-specs', 'cobalt-applications', 'cobalt-standards', 'cobalt-handling', 'cobalt-certification'
+    ];
+
+    let availableCount = 0;
+    let totalCount = documentIds.length;
+
+    documentIds.forEach(docId => {
+        const savedDoc = localStorage.getItem(`khumotone_document_${docId}`);
+        const button = document.querySelector(`button[onclick="downloadDocument('${docId}')"]`);
+        
+        if (button) {
+            // Verificar se já existe um elemento de informação para evitar duplicação
+            const parentDiv = button.closest('.flex.items-center.justify-between');
+            if (parentDiv) {
+                // Remover informações antigas antes de adicionar novas
+                const existingInfo = parentDiv.querySelector('.document-info');
+                if (existingInfo) {
+                    existingInfo.remove();
+                }
+                
+                const existingBadge = parentDiv.querySelector('.available-badge, .unavailable-badge');
+                if (existingBadge) {
+                    existingBadge.remove();
+                }
+            }
+
+            if (savedDoc) {
+                try {
+                    const docData = JSON.parse(savedDoc);
+                    // Documento disponível
+                    availableCount++;
+                    
+                    // Atualizar botão
+                    button.innerHTML = `
+                        <span class="material-symbols-outlined text-base">download</span>
+                        <span class="truncate">Download</span>
+                    `;
+                    button.className = button.className.replace(/bg-(gray|red|blue)-400/g, '') + ' bg-primary hover:bg-primary/90';
+                    button.onclick = function(e) {
+                        e.preventDefault();
+                        downloadDocument(docId);
+                    };
+                    
+                    // Adicionar badge de "Disponível" e informações
+                    if (parentDiv) {
+                        parentDiv.classList.add('document-status', 'available');
+                        parentDiv.classList.remove('unavailable');
+                        
+                        const docName = parentDiv.querySelector('p');
+                        if (docName) {
+                            // Adicionar novo badge
+                            const badge = document.createElement('span');
+                            badge.className = 'available-badge ml-2';
+                            badge.textContent = '✓ Disponível';
+                            docName.appendChild(badge);
+                            
+                            // Adicionar informações do documento (apenas uma vez)
+                            if (!parentDiv.querySelector('.document-info')) {
+                                const info = document.createElement('div');
+                                info.className = 'document-info text-xs text-gray-500 dark:text-gray-400 mt-1';
+                                info.innerHTML = `
+                                    <span>${formatFileSize(docData.size)} • ${new Date(docData.uploadDate).toLocaleDateString()}</span>
+                                `;
+                                docName.parentElement.appendChild(info);
+                            }
+                        }
+                    }
+                    
+                } catch (error) {
+                    console.error(`Erro ao processar documento ${docId}:`, error);
+                    markDocumentAsUnavailable(button, docId);
+                }
+            } else {
+                // Documento não disponível
+                markDocumentAsUnavailable(button, docId);
+            }
+        }
+    });
+
+    // Atualizar contador de documentos
+    updateDocumentCounter(availableCount, totalCount);
+}
+
+// Função para marcar documento como indisponível
+function markDocumentAsUnavailable(button, docId) {
+    button.innerHTML = `
+        <span class="material-symbols-outlined text-base">block</span>
+        <span class="truncate">Unavailable</span>
+    `;
+    button.className = button.className.replace(/bg-(primary|green|blue)-500/g, '') + ' bg-gray-400 cursor-not-allowed';
+    button.onclick = function(e) {
+        e.preventDefault();
+        showDownloadStatus('This document has not been made available yet. Please contact us for more information.', 'info');
+    };
+    
+    const parentDiv = button.closest('.flex.items-center.justify-between');
+    if (parentDiv) {
+        parentDiv.classList.add('document-status', 'unavailable');
+        parentDiv.classList.remove('available');
+        
+        const docName = parentDiv.querySelector('p');
+        if (docName) {
+            // Adicionar badge de indisponível
+            const badge = document.createElement('span');
+            badge.className = 'unavailable-badge ml-2';
+            badge.textContent = ' Coming soon';
+            docName.appendChild(badge);
+        }
+    }
+}
+
+// Função para atualizar contador de documentos
+function updateDocumentCounter(available, total) {
+    let counterElement = document.getElementById('documentCounter');
+    if (!counterElement) {
+        // Criar elemento do contador se não existir
+        const header = document.querySelector('h1.text-4xl');
+        if (header) {
+            counterElement = document.createElement('div');
+            counterElement.id = 'documentCounter';
+            counterElement.className = 'mt-2 text-lg text-subtle-light dark:text-subtle-dark';
+            header.parentElement.appendChild(counterElement);
+        }
+    }
+    
+    if (counterElement) {
+        const percentage = Math.round((available / total) * 100);
+        counterElement.innerHTML = `
+            <div class="flex items-center justify-center gap-4">
+                <span class="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-3 py-1 rounded-full text-sm font-medium">
+                    ${available} available documents
+                </span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">
+                    ${percentage}% from the complete library
+                </span>
+            </div>
+        `;
+    }
+}
+
+// Função para formatar tamanho de arquivo
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Function to handle tab switching for language descriptions
+function switchLanguageTab(language, element) {
+  // Remove active class from all tabs
+  const tabs = document.querySelectorAll('.language-tab');
+  tabs.forEach(tab => {
+    tab.classList.remove('border-b-primary', 'text-text-light', 'dark:text-text-dark');
+    tab.classList.add('border-b-transparent', 'text-text-muted-light', 'dark:text-text-muted-dark');
+  });
+  
+  // Add active class to clicked tab
+  element.classList.add('border-b-primary', 'text-text-light', 'dark:text-text-dark');
+  element.classList.remove('border-b-transparent', 'text-text-muted-light', 'dark:text-text-muted-dark');
+  
+  // Hide all tab contents
+  const contents = document.querySelectorAll('.tab-content');
+  contents.forEach(content => {
+    content.classList.remove('active');
+  });
+  
+  // Show selected tab content
+  const activeContent = document.getElementById(`content-${language}`);
+  if (activeContent) {
+    activeContent.classList.add('active');
+  }
+}
+
+// Variável para controlar se a interface já foi inicializada
+let interfaceInitialized = false;
+
+// Atualizar interface quando a página carregar
+document.addEventListener('DOMContentLoaded', function() {
+    if (!interfaceInitialized) {
+        updateDocumentInterface();
+        interfaceInitialized = true;
+    }
+    
+    // Activate first language tab by default
+    const firstTab = document.querySelector('.language-tab');
+    if (firstTab) {
+        switchLanguageTab('portuguese', firstTab);
+    }
+});
+
+// Adicionar animação CSS
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fade-in {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+        animation: fade-in 0.3s ease-out;
+    }
+    .document-status {
+        transition: all 0.3s ease;
+    }
+    .document-status.available:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+    }
+`;
+document.head.appendChild(style);
+</script>
+
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
+
+<header class="sticky top-0 z-50 flex w-full items-center justify-center bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-border-light dark:border-border-dark">
+  <div class="flex items-center justify-between w-full max-w-6xl px-4 py-4">
+    <div class="flex items-center gap-3 text-[#333333]">
+      <img 
+        src="logo2.png" 
+        alt="KHUMOTONE Logo" 
+        class="h-8 w-auto object-contain"
+      >
+    </div>
+
+    <button id="menu-toggle" class="md:hidden flex flex-col gap-1.5 cursor-pointer" aria-label="Open menu">
+      <span class="block w-6 h-0.5 bg-[#333333]"></span>
+      <span class="block w-6 h-0.5 bg-[#333333]"></span>
+      <span class="block w-6 h-0.5 bg-[#333333]"></span>
+    </button>
+
+    <nav class="hidden md:flex items-center gap-8">
+      <a class="text-sm font-semibold nav-link text-[#333333]" href="index.html">Home</a>
+      <a class="text-sm font-semibold nav-link text-[#333333]" href="sobre.html">About Us</a>
+      <a class="text-sm font-semibold nav-link text-[#333333]" href="contacto.html">Contact</a>
+      <a class="text-sm font-semibold nav-link text-[#333333]" href="contratos.html">Documents</a>
+    </nav>
+
+      <!-- Container para linha e seletor de idioma -->
+<div class="flex items-center gap-4">
+  <!-- Linha divisória (apenas desktop) -->
+  <div class="hidden md:block h-6 w-px bg-border-light dark:bg-border-dark"></div>
+  
+  <!-- Seletor de idioma -->
+  <div class="relative" x-data="{ open: false, currentLanguage: 'EN' }">
+    <button @click="open = !open" class="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors" type="button">
+      <!-- Ícone de linguagem protegido -->
+      <span class="material-symbols-outlined !text-xl notranslate" translate="no">language</span>
+      <span x-text="currentLanguage">EN</span>
+      <!-- Ícone expandir protegido -->
+      <span class="material-symbols-outlined !text-xl transition-transform notranslate" translate="no" :class="{ 'rotate-180': open }">expand_more</span>
+    </button>
+    
+    <div x-show="open" 
+         x-transition
+         @click.outside="open = false"
+         class="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-background-light dark:bg-background-dark shadow-lg ring-1 ring-black dark:ring-white ring-opacity-5 dark:ring-opacity-10 focus:outline-none py-1 z-50"
+         x-cloak>
+      <a class="block px-4 py-2 text-sm text-text-light dark:text-text-dark hover:bg-gray-100 dark:hover:bg-gray-800/50 notranslate" translate="no" href="#" @click="changeLanguage('pt', 'PT'); open = false;">Português</a>
+      <a class="block px-4 py-2 text-sm text-text-light dark:text-text-dark hover:bg-gray-100 dark:hover:bg-gray-800/50 notranslate" translate="no" href="#" @click="changeLanguage('fr', 'FR'); open = false;">Français</a>
+      <a class="block px-4 py-2 text-sm text-text-light dark:text-text-dark hover:bg-gray-100 dark:hover:bg-gray-800/50 notranslate" translate="no" href="#" @click="changeLanguage('en', 'EN'); open = false;">English</a>
+      <a class="block px-4 py-2 text-sm text-text-light dark:text-text-dark hover:bg-gray-100 dark:hover:bg-gray-800/50 notranslate" translate="no" href="#" @click="changeLanguage('es', 'ES'); open = false;">Español</a>
+      <a class="block px-4 py-2 text-sm text-text-light dark:text:text-text-dark hover:bg-gray-100 dark:hover:bg-gray-800/50 notranslate" translate="no" href="#" @click="changeLanguage('zh-CN', '中文'); open = false;">中文</a>
+      <a class="block px-4 py-2 text-sm text-text-light dark:text-text-dark hover:bg-gray-100 dark:hover:bg-gray-800/50 notranslate" translate="no" href="#" @click="changeLanguage('ar', 'العربية'); open = false;">العربية</a>
+    </div>
+  </div>
+</div>
+</div>
+</header>
+
+<!-- Widget do Google Translate -->
+<div id="google_translate_element" style="position:absolute;top:0;left:0;z-index:999999;opacity:0;width:1px;height:1px;overflow:hidden;"></div>
+
+<script>
+// Configuração do Google Translate
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'pt',
+    includedLanguages: 'pt,fr,en,es,zh-CN,ar',
+    layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+    autoDisplay: false
+  }, 'google_translate_element');
+  
+  console.log('Google Translate inicializado');
+}
+
+// Função para mudar idioma
+function changeLanguage(lang, displayName) {
+  console.log('Mudando para idioma:', lang);
+  
+  // Proteger elementos com ícones antes da tradução
+  protectIcons();
+  
+  // Método direto usando o seletor do Google Translate
+  const select = document.querySelector('.goog-te-combo');
+  if (select) {
+    select.value = lang;
+    select.dispatchEvent(new Event('change'));
+    console.log('Idioma alterado via seletor');
+  } else {
+    console.log('Seletor não encontrado, tentando método alternativo...');
+    // Método alternativo: recriar o widget
+    recreateTranslateWidget(lang);
+  }
+  
+  // Atualizar texto do botão
+  const dropdown = document.querySelector('[x-data]');
+  if (dropdown && dropdown.__x) {
+    dropdown.__x.$data.currentLanguage = displayName;
+  }
+  
+  // Salvar preferência no localStorage
+  localStorage.setItem('preferredLanguage', lang);
+  localStorage.setItem('languageDisplay', displayName);
+  
+  // Reaplicar proteção após tradução
+  setTimeout(protectIcons, 500);
+}
+
+// Função para proteger todos os ícones
+function protectIcons() {
+  // Proteger ícones do Material Symbols
+  const materialIcons = document.querySelectorAll('.material-symbols-outlined');
+  materialIcons.forEach(icon => {
+    icon.classList.add('notranslate');
+    icon.setAttribute('translate', 'no');
+  });
+  
+  // Proteger outros elementos que não devem ser traduzidos
+  const noTranslateElements = document.querySelectorAll('[class*="icon"], [class*="Icon"]');
+  noTranslateElements.forEach(element => {
+    element.classList.add('notranslate');
+    element.setAttribute('translate', 'no');
+  });
+}
+
+// Método alternativo para recriar o widget
+function recreateTranslateWidget(lang) {
+  const oldElement = document.getElementById('google_translate_element');
+  if (oldElement) {
+    oldElement.innerHTML = '';
+  }
+  
+  // Recriar o widget com o novo idioma
+  new google.translate.TranslateElement({
+    pageLanguage: 'pt',
+    includedLanguages: 'pt,fr,en,es,zh-CN,ar',
+    layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+  }, 'google_translate_element');
+  
+  // Dar tempo para o widget carregar e então mudar o idioma
+  setTimeout(() => {
+    const select = document.querySelector('.goog-te-combo');
+    if (select) {
+      select.value = lang;
+      select.dispatchEvent(new Event('change'));
+    }
+    // Reaplicar proteção
+    setTimeout(protectIcons, 500);
+  }, 1000);
+}
+
+// Carregar script do Google Translate
+function loadGoogleTranslate() {
+  if (window.google && window.google.translate) {
+    return; // Já está carregado
+  }
+  
+  const script = document.createElement('script');
+  script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+  script.async = true;
+  document.head.appendChild(script);
+}
+
+// Restaurar idioma preferido ao carregar a página
+function restoreLanguagePreference() {
+  const savedLang = localStorage.getItem('preferredLanguage');
+  const savedDisplay = localStorage.getItem('languageDisplay');
+  
+  if (savedLang && savedDisplay) {
+    const dropdown = document.querySelector('[x-data]');
+    if (dropdown && dropdown.__x) {
+      dropdown.__x.$data.currentLanguage = savedDisplay;
+    }
+    
+    // Aplicar o idioma salvo após o Google Translate carregar
+    setTimeout(() => {
+      const select = document.querySelector('.goog-te-combo');
+      if (select && select.value !== savedLang) {
+        select.value = savedLang;
+        select.dispatchEvent(new Event('change'));
+      }
+      // Proteger ícones após restaurar idioma
+      setTimeout(protectIcons, 500);
+    }, 2000);
+  }
+}
+
+// Inicializar quando a página carregar
+document.addEventListener('DOMContentLoaded', function() {
+  loadGoogleTranslate();
+  restoreLanguagePreference();
+  
+  // Proteger ícones imediatamente
+  protectIcons();
+  
+  // Monitorar mudanças no DOM para proteger novos ícones
+  const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.type === 'childList') {
+        protectIcons();
+      }
+    });
+  });
+  
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+  
+  // Esconder elementos visuais do Google Translate
+  const hideGTranslate = setInterval(() => {
+    const elements = [
+      '.goog-te-banner-frame',
+      '.goog-te-menu-frame',
+      '.goog-te-ftab-frame',
+      '.goog-te-gadget',
+      '.goog-te-combo',
+      '.skiptranslate'
+    ];
+    
+    elements.forEach(selector => {
+      const element = document.querySelector(selector);
+      if (element) {
+        element.style.display = 'none';
+        element.style.visibility = 'hidden';
+        element.style.opacity = '0';
+        element.style.width = '0';
+        element.style.height = '0';
+        element.style.overflow = 'hidden';
+      }
+    });
+    
+    // Corrigir posição do body
+    if (document.body.style.top !== '0px') {
+      document.body.style.top = '0px !important';
+    }
+  }, 100);
+  
+  // Parar após 10 segundos
+  setTimeout(() => clearInterval(hideGTranslate), 10000);
+});
+
+// Fallback se o Google Translate não carregar
+setTimeout(() => {
+  if (!window.google || !window.google.translate) {
+    console.log('Google Translate não carregou, tentando novamente...');
+    loadGoogleTranslate();
+  }
+}, 3000);
+</script>
+
+        
+  </div>
+</header>
+
+<nav id="mobile-menu" class="hidden flex-col items-center gap-4 bg-background-light dark:bg-background-dark border-t border-border-light dark:border-border-dark py-4 md:hidden">
+  <a class="text-sm font-semibold nav-link text-[#333333]" href="index.html">Home</a>
+  <a class="text-sm font-semibold nav-link text-[#333333]" href="sobre.html">About Us</a>
+  <a class="text-sm font-semibold nav-link text-[#333333]" href="contacto.html">Contact</a>
+  <a class="text-sm font-semibold nav-link text-[#333333]" href="contratos.html">Documents</a>
+</nav>
+
+<div class="relative flex min-h-screen w-full flex-col">
+
+<main class="flex-grow">
+  <div class="container mx-auto max-w-5xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+
+    <div class="mb-12 text-center">
+      <h1 class="text-4xl font-extrabold tracking-tight text-text-light dark:text-text-dark sm:text-5xl lg:text-6xl">Document Center</h1>
+      <p class="mx-auto mt-4 max-w-2xl text-lg text-subtle-light dark:text-subtle-dark">Access our complete documentation to begin your negotiation process.</p>
+      <!-- Contador de documentos será inserido aqui dinamicamente -->
+    </div>
+
+    <!-- Accordions Component -->
+    <div class="flex flex-col gap-3 max-w-4xl mx-auto">
+      <!-- Accordion 1: About Khumotone -->
+      <details
+        class="flex flex-col rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark/50 px-[15px] py-[7px] group"
+        open=""
+      >
+        <summary
+          class="flex cursor-pointer items-center justify-between gap-6 py-2"
+        >
+          <p
+            class="text-text-light dark:text-text-dark text-sm font-medium leading-normal"
+          >
+            About Khumotone
+          </p>
+          <span
+            class="material-symbols-outlined text-text-light dark:text-text-dark group-open:rotate-180 transition-transform"
+            >expand_more</span
+          >
+        </summary>
+        <div class="pt-2 pb-2">
+          <!-- Tabs Component -->
+          <div class="pb-3">
+            <div
+              class="flex border-b border-border-light dark:border-border-dark gap-2 sm:gap-4 md:gap-8 overflow-x-auto"
+            >
+              <a
+                class="language-tab flex flex-col items-center justify-center border-b-[3px] border-b-primary text-text-light dark:text-text-dark pb-[13px] pt-4 px-2 sm:px-4 cursor-pointer"
+                onclick="switchLanguageTab('portuguese', this)"
+              >
+                <p
+                  class="text-sm font-bold leading-normal tracking-[0.015em] whitespace-nowrap"
+                >
+                  Portuguese
+                </p>
+              </a>
+              <a
+                class="language-tab flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-text-muted-light dark:text-text-muted-dark pb-[13px] pt-4 px-2 sm:px-4 cursor-pointer"
+                onclick="switchLanguageTab('french', this)"
+              >
+                <p
+                  class="text-sm font-bold leading-normal tracking-[0.015em] whitespace-nowrap"
+                >
+                  French
+                </p>
+              </a>
+              <a
+                class="language-tab flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-text-muted-light dark:text-text-muted-dark pb-[13px] pt-4 px-2 sm:px-4 cursor-pointer"
+                onclick="switchLanguageTab('english', this)"
+              >
+                <p
+                  class="text-sm font-bold leading-normal tracking-[0.015em] whitespace-nowrap"
+                >
+                  English
+                </p>
+              </a>
+              <a
+                class="language-tab flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-text-muted-light dark:text-text-muted-dark pb-[13px] pt-4 px-2 sm:px-4 cursor-pointer"
+                onclick="switchLanguageTab('spanish', this)"
+              >
+                <p
+                  class="text-sm font-bold leading-normal tracking-[0.015em] whitespace-nowrap"
+                >
+                  Spanish
+                </p>
+              </a>
+              <a
+                class="language-tab flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-text-muted-light dark:text-text-muted-dark pb-[13px] pt-4 px-2 sm:px-4 cursor-pointer"
+                onclick="switchLanguageTab('mandarin', this)"
+              >
+                <p
+                  class="text-sm font-bold leading-normal tracking-[0.015em] whitespace-nowrap"
+                >
+                  Mandarin
+                </p>
+              </a>
+              <a
+                class="language-tab flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-text-muted-light dark:text-text-muted-dark pb-[13px] pt-4 px-2 sm:px-4 cursor-pointer"
+                onclick="switchLanguageTab('arabic', this)"
+              >
+                <p
+                  class="text-sm font-bold leading-normal tracking-[0.015em] whitespace-nowrap"
+                >
+                  Arabic
+                </p>
+              </a>
+            </div>
+          </div>
+          
+          <!-- Language Content -->
+          <div id="content-portuguese" class="tab-content">
+            <p class="text-text-muted-light dark:text-text-muted-dark text-base font-normal leading-normal pb-3 pt-1">
+Khumotone – Comércio Internacional com Alcance Global
+
+A Khumotone é uma empresa internacional de comércio e mineração, com operações consolidadas na África Central e Austral e expansão estratégica para Dubai e Hong Kong. Atuamos na exportação de cátodos de cobre Grau A (99,99%), cobalto de alta pureza e minerais essenciais para as principais cadeias industriais globais. <br>
+
+Com infraestrutura operacional robusta, certificação SGS, entregas CIF e forte presença nos mercados asiáticos, europeus e do Golfo Árabe, garantimos fornecimento contínuo, qualidade superior e total conformidade. <br>
+
+Oferecemos suporte multilíngue em Mandarim, Inglês, Francês, Árabe e Português, assegurando comunicação direta e eficiente com compradores internacionais. <br>
+
+Khumotone — conectando África ao mundo com confiança, transparência e resultados.            </p>
+          </div>
+          
+          <div id="content-french" class="tab-content">
+            <p class="text-text-muted-light dark:text-text-muted-dark text-base font-normal leading-normal pb-3 pt-1">
+Khumotone – Commerce international avec portée mondiale
+
+Khumotone est une entreprise internationale de commerce et d'exploitation minière, avec des opérations consolidées en Afrique centrale et australe et une expansion stratégique vers Dubaï et Hong Kong. Nous exportons des cathodes de cuivre de grade A (99,99 %), du cobalt de haute pureté et des minéraux essentiels pour les principales chaînes industrielles mondiales. <br>
+
+Avec une infrastructure opérationnelle solide, une certification SGS, des livraisons CIF et une forte présence sur les marchés asiatiques, européens et du Golfe Arabe, nous garantissons un approvisionnement continu, une qualité supérieure et une conformité totale. <br>
+
+Nous offrons un support multilingue en mandarin, anglais, français, arabe et portugais, assurant une communication directe et efficace avec les acheteurs internationaux. <br>
+
+Khumotone — reliant l'Afrique au monde avec confiance, transparence et résultats.            </p>
+          </div>
+          
+          <div id="content-english" class="tab-content">
+            <p class="text-text-muted-light dark:text-text-muted-dark text-base font-normal leading-normal pb-3 pt-1">
+              Khumotone is a leade Khumotone – International Trade with Global Reach
+
+Khumotone is an international trading and mining company with established operations in Central and Southern Africa and strategic expansion into Dubai and Hong Kong. We specialize in exporting Grade A copper cathodes (99.99%), high-purity cobalt, and essential minerals for key global industrial chains. <br>
+
+With robust operational infrastructure, SGS certification, CIF deliveries, and a strong presence in Asian, European, and Arab Gulf markets, we ensure continuous supply, superior quality, and full compliance. <br>
+
+We offer multilingual support in Mandarin, English, French, Arabic, and Portuguese, ensuring direct and efficient communication with international buyers. <br>
+
+Khumotone — connecting Africa to the world with confidence, transparency, and results.r in the supply of copper sheets and mineral commodities, committed to quality, sustainability and innovation. We serve global markets with excellence and integrity, building lasting partnerships and driving industry progress.
+            </p>
+          </div>
+          
+          <div id="content-spanish" class="tab-content">
+            <p class="text-text-muted-light dark:text-text-muted-dark text-base font-normal leading-normal pb-3 pt-1">
+Khumotone – Comercio Internacional con Alcance Global
+
+Khumotone es una empresa internacional de comercio y minería, con operaciones consolidadas en África Central y Austral y expansión estratégica hacia Dubái y Hong Kong. Nos especializamos en la exportación de cátodos de cobre Grado A (99,99%), cobalto de alta pureza y minerales esenciales para las principales cadenas industriales globales. <br>
+
+Con una infraestructura operativa sólida, certificación SGS, entregas CIF y una fuerte presencia en los mercados asiáticos, europeos y del Golfo Árabe, garantizamos suministro continuo, calidad superior y total conformidad. <br>
+
+Ofrecemos soporte multilingüe en mandarín, inglés, francés, árabe y portugués, asegurando comunicación directa y eficiente con compradores internacionales. <br>
+
+Khumotone — conectando África con el mundo con confianza, transparencia y resultados.            </p>
+          </div>
+          
+          <div id="content-mandarin" class="tab-content">
+            <p class="text-text-muted-light dark:text-text-muted-dark text-base font-normal leading-normal pb-3 pt-1">
+              Khumotone – 全球化的國際貿易
+
+Khumotone 是一家國際貿易與礦業公司，在中非和南非擁有穩固的業務，並正戰略性地擴展至杜拜和香港。我們從事出口 A 級銅陰極（99.99%）、高純度鈷以及對全球主要產業鏈至關重要的礦產。<br>
+
+憑藉堅實的運營基礎設施、SGS 認證、CIF 交貨以及在亞洲、歐洲和阿拉伯灣市場的強大存在，我們確保持續供應、優質品質和完全合規。<br>
+
+我們提供多語言支持，包括中文、英語、法語、阿拉伯語和葡萄牙語，確保與國際買家的直接高效溝通。<br>
+
+Khumotone — 以信任、透明及成果，連接非洲與世界。
+            </p>
+          </div>
+          
+          <div id="content-arabic" class="tab-content">
+            <p class="text-text-muted-light dark:text-text-muted-dark text-base font-normal leading-normal pb-3 pt-1">
+Khumotone – التجارة الدولية بنطاق عالمي خوموتون هي شركة دولية في التجارة والتعدين، مع عمليات مستقرة في أفريقيا الوسطى والجنوبية وتوسع استراتيجي لدبي وهونغ كونغ. كنشتغلو في تصدير كاثود النحاس درجة A (99,99٪)، والكوبالت عالي النقاء والمعادن الأساسية للسلاسل الصناعية العالمية الكبيرة. مع بنية تحتية تشغيلية قوية، وشهادة SGS، والتوصيل CIF، وحضور قوي في الأسواق الآسيوية والأوروبية والخليج العربي، كنضمنو التوريد المستمر، وجودة عالية، والالتزام الكامل بالمعايير. كنقدمو الدعم بعدة لغات بالصينية، الإنجليزية، الفرنسية، العربية والبرتغالية، باش نضمنو تواصل مباشر وفعال مع المشترين الدوليين. خوموتون — كتوصل إفريقيا بالعالم بالثقة، الشفافية والنتائج.            </p>
+          </div>
+        </div>
+      </details>
+      
+      <!-- Accordion 2: Business Plan -->
+      <details
+        class="flex flex-col rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark/50 px-[15px] py-[7px] group"
+      >
+        <summary
+          class="flex cursor-pointer items-center justify-between gap-6 py-2"
+        >
+          <p
+            class="text-text-light dark:text-text-dark text-sm font-medium leading-normal"
+          >
+            Khumotone Business Plan
+          </p>
+          <span
+            class="material-symbols-outlined text-text-light dark:text-text-dark group-open:rotate-180 transition-transform"
+            >expand_more</span
+          >
+        </summary>
+        <div class="py-2 space-y-3">
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              Khumotone Business Plan (Português)
+            </p>
+            <button
+              onclick="downloadDocument('business-plan-executive')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              Khumotone Business Plan (French)
+            </p>
+            <button
+              onclick="downloadDocument('market-analysis')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              Khumotone Business Plan (English)
+            </p>
+            <button
+              onclick="downloadDocument('expansion-strategy')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              Khumotone Business Plan (Spanish)
+            </p>
+            <button
+              onclick="downloadDocument('financial-projections')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              Khumotone Business Plan (Mandarin)
+            </p>
+            <button
+              onclick="downloadDocument('risk-assessment')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+        </div>
+      </details>
+      
+      <!-- Accordion 3: Procedures -->
+      <details
+        class="flex flex-col rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark/50 px-[15px] py-[7px] group"
+      >
+        <summary
+          class="flex cursor-pointer items-center justify-between gap-6 py-2"
+        >
+          <p
+            class="text-text-light dark:text-text-dark text-sm font-medium leading-normal"
+          >
+            Procedures
+          </p>
+          <span
+            class="material-symbols-outlined text-text-light dark:text-text-dark group-open:rotate-180 transition-transform"
+            >expand_more</span
+          >
+        </summary>
+        <div class="py-2 space-y-3">
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              Procedures (Português)
+            </p>
+            <button
+              onclick="downloadDocument('operational-procedure')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              Procedures (French)
+            </p>
+            <button
+              onclick="downloadDocument('quality-control')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              Procedures (English)
+            </p>
+            <button
+              onclick="downloadDocument('safety-protocols')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              Procedures (Spanish)
+            </p>
+            <button
+              onclick="downloadDocument('logistics-process')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              Procedures (Mandarin)
+            </p>
+            <button
+              onclick="downloadDocument('compliance-procedure')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+        </div>
+      </details>
+      
+      <!-- Accordion 4: LOI -->
+      <details
+        class="flex flex-col rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark/50 px-[15px] py-[7px] group"
+      >
+        <summary
+          class="flex cursor-pointer items-center justify-between gap-6 py-2"
+        >
+          <p
+            class="text-text-light dark:text-text-dark text-sm font-medium leading-normal"
+          >
+            L.O.I. (Letter of Intent)
+          </p>
+          <span
+            class="material-symbols-outlined text-text-light dark:text-text-dark group-open:rotate-180 transition-transform"
+            >expand_more</span
+          >
+        </summary>
+        <div class="py-2 space-y-3">
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              L.O.I. (Português)
+            </p>
+            <button
+              onclick="downloadDocument('letter-intent')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              L.O.I. (French)
+            </p>
+            <button
+              onclick="downloadDocument('loi-guidelines')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              L.O.I. (English)
+            </p>
+            <button
+              onclick="downloadDocument('nda-template')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              L.O.I. (Spanish)
+            </p>
+            <button
+              onclick="downloadDocument('term-sheet')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              L.O.I. (Mandarin)
+            </p>
+            <button
+              onclick="downloadDocument('due-diligence')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+        </div>
+      </details>
+      
+      <!-- Accordion 5: FCO -->
+      <details
+        class="flex flex-col rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark/50 px-[15px] py-[7px] group"
+      >
+        <summary
+          class="flex cursor-pointer items-center justify-between gap-6 py-2"
+        >
+          <p
+            class="text-text-light dark:text-text-dark text-sm font-medium leading-normal"
+          >
+            F.C.O. (Full Corporate Offer)
+          </p>
+          <span
+            class="material-symbols-outlined text-text-light dark:text-text-dark group-open:rotate-180 transition-transform"
+            >expand_more</span
+          >
+        </summary>
+        <div class="py-2 space-y-3">
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              F.C.O. (Português)
+            </p>
+            <button
+              onclick="downloadDocument('full-corporate-offer')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              F.C.O. (French)
+            </p>
+            <button
+              onclick="downloadDocument('fco-guidelines')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              F.C.O. (English)
+            </p>
+            <button
+              onclick="downloadDocument('product-specs')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              F.C.O. (Spanish)
+            </p>
+            <button
+              onclick="downloadDocument('pricing-structure')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              F.C.O. (Mandarin)
+            </p>
+            <button
+              onclick="downloadDocument('delivery-terms')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+        </div>
+      </details>
+      
+      <!-- Accordion 6: SPA -->
+      <details
+        class="flex flex-col rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark/50 px-[15px] py-[7px] group"
+      >
+        <summary
+          class="flex cursor-pointer items-center justify-between gap-6 py-2"
+        >
+          <p
+            class="text-text-light dark:text-text-dark text-sm font-medium leading-normal"
+          >
+            S.P.A. (Sales and Purchase Agreement)
+          </p>
+          <span
+            class="material-symbols-outlined text-text-light dark:text-text-dark group-open:rotate-180 transition-transform"
+            >expand_more</span
+          >
+        </summary>
+        <div class="py-2 space-y-3">
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              S.P.A. (Português)
+            </p>
+            <button
+              onclick="downloadDocument('sales-purchase-agreement')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              S.P.A. (French)
+            </p>
+            <button
+              onclick="downloadDocument('spa-guidelines')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              S.P.A. (English)
+            </p>
+            <button
+              onclick="downloadDocument('payment-terms')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              S.P.A. (Spanish)
+            </p>
+            <button
+              onclick="downloadDocument('warranty-terms')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              S.P.A. (Mandarin)
+            </p>
+            <button
+              onclick="downloadDocument('dispute-resolution')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+        </div>
+      </details>
+      
+      <!-- Accordion 7: Copper -->
+      <details
+        class="flex flex-col rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark/50 px-[15px] py-[7px] group"
+      >
+        <summary
+          class="flex cursor-pointer items-center justify-between gap-6 py-2"
+        >
+          <p
+            class="text-text-light dark:text-text-dark text-sm font-medium leading-normal"
+          >
+            COPPER TECHNICAL SHEET
+          </p>
+          <span
+            class="material-symbols-outlined text-text-light dark:text-text-dark group-open:rotate-180 transition-transform"
+            >expand_more</span
+          >
+        </summary>
+        <div class="py-2 space-y-3">
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              COPPER TECHNICAL SHEET (Português)
+            </p>
+            <button
+              onclick="downloadDocument('copper-specs')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              COPPER TECHNICAL SHEET (French)
+            </p>
+            <button
+              onclick="downloadDocument('copper-applications')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              COPPER TECHNICAL SHEET (English)
+            </p>
+            <button
+              onclick="downloadDocument('copper-standards')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              COPPER TECHNICAL SHEET  (Spanish)
+            </p>
+            <button
+              onclick="downloadDocument('copper-handling')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              COPPER TECHNICAL SHEET (Mandarin)
+            </p>
+            <button
+              onclick="downloadDocument('copper-certification')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+        </div>
+      </details>
+      
+      <!-- Accordion 8: Cobalt -->
+      <details
+        class="flex flex-col rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark/50 px-[15px] py-[7px] group"
+      >
+        <summary
+          class="flex cursor-pointer items-center justify-between gap-6 py-2"
+        >
+          <p
+            class="text-text-light dark:text-text-dark text-sm font-medium leading-normal"
+          >
+            COBALT TECHNICAL SHEET
+          </p>
+          <span
+            class="material-symbols-outlined text-text-light dark:text-text-dark group-open:rotate-180 transition-transform"
+            >expand_more</span
+          >
+        </summary>
+        <div class="py-2 space-y-3">
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              COBALT TECHNICAL SHEET (Português)
+            </p>
+            <button
+              onclick="downloadDocument('cobalt-specs')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              COBALT TECHNICAL SHEET (French)
+            </p>
+            <button
+              onclick="downloadDocument('cobalt-applications')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              COBALT TECHNICAL SHEET (English)
+            </p>
+            <button
+              onclick="downloadDocument('cobalt-standards')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              COBALT TECHNICAL SHEET (Spanish)
+            </p>
+            <button
+              onclick="downloadDocument('cobalt-handling')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 rounded-md bg-primary/10 dark:bg-primary/20"
+          >
+            <p
+              class="text-sm text-text-light dark:text-text-dark font-medium"
+            >
+              COBALT TECHNICAL SHEET (Mandarin)
+            </p>
+            <button
+              onclick="downloadDocument('cobalt-certification')"
+              class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-md h-9 px-3 bg-primary text-white text-xs font-bold tracking-wide"
+            >
+              <span class="material-symbols-outlined text-base"
+                >download</span
+              >
+              <span class="truncate">Download</span>
+            </button>
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+</main>
+</div>
+
+<footer class="w-full bg-gray-100 dark:bg-gray-800/30 border-t border-border-light dark:border-border-dark">
+  <div class="max-w-6xl mx-auto py-8 px-4 flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-4">
+    <p class="text-sm text-[#71797E]">© 2025 KHUMOTONE. All rights reserved.</p>
+    <div class="flex items-center gap-4">
+      <a class="text-sm text-[#71797E] hover:text-primary transition-colors" href="termos.html">Terms of Service</a>
+      <a class="text-sm text-[#71797E] hover:text-primary transition-colors" href="politicas.html">Privacy Policy</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Floating Buttons -->
+<div class="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
+
+  <!-- WhatsApp -->
+  <a
+    href="https://wa.me/+244926849260"
+    target="_blank"
+    aria-label="Contact us on WhatsApp"
+    class="flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-white shadow-lg transition-transform hover:scale-110"
+  >
+    <i class="fa-brands fa-whatsapp text-3xl"></i>
+  </a>
+
+  <!-- WeChat -->
+  <div class="relative inline-block">
+    <button
+      id="wechat-btn"
+      type="button"
+      aria-label="Contact us on WeChat"
+      class="flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-white shadow-lg transition-transform hover:scale-110"
+    >
+      <i class="fa-brands fa-weixin text-3xl"></i>
+    </button>
+
+    <div
+      id="wechat-popup"
+      class="hidden absolute bottom-16 left-0 translate-x-[-80%] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl rounded-xl p-3 w-56 text-center transition-all duration-300 opacity-0 scale-95"
+    >
+      <img
+        src="qr.jpg"
+        alt="WeChat QR Code"
+        class="rounded-lg mx-auto mb-2"
+      />
+      <p class="text-sm text-gray-700 dark:text-gray-300">Scan to chat</p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

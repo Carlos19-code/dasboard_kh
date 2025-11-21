@@ -1,0 +1,4 @@
+// Credenciais válidas
+        email: 'Admin'
+
+        password: 'Cobalto72%Nebula'
