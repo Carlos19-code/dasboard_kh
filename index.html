@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html class="" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>KHUMOTONE - Supply of Copper and Mineral Commodities</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Montserrat:wght@700&amp;family=Lato:wght@400&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+      rel="stylesheet"
+    />
+
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <link rel="shortcut icon" href="favicon.png" type="image/x-icon" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#0072FF",
+              "background-light": "#FDFDFD",
+              "background-dark": "#1a1a1a",
+              "text-light": "#333333",
+              "text-dark": "#E0E0E0",
+              secondary: "#71797E",
+              "border-light": "#e5e7eb",
+              "border-dark": "#374151",
+            },
+            fontFamily: {
+              display: ["Manrope"],
+              heading: ["Montserrat"],
+              body: ["Lato"],
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+          },
+        },
+      };
+    </script>
+
+  <style>
+    body {
+      font-family: 'Lato', sans-serif;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Montserrat', sans-serif;
+    }
+    .font-display {
+      font-family: 'Manrope', 'Noto Sans', sans-serif;
+    }
+
+    /* === Hover personalizado === */
+    .nav-link {
+      color: inherit;
+      transition: color 0.3s ease;
+    }
+    .nav-link:hover {
+      color: #0072FF !important;
+    }
+
+    /* === Responsividade e animação === */
+    @media (max-width: 768px) {
+      #mobile-menu.show {
+        display: flex !important;
+        animation: fadeIn 0.3s ease-in-out;
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Estilos para o vídeo de fundo */
+    .video-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+
+    .video-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 0;
+    }
+
+    [x-cloak] { display: none !important; }
+  </style>
+
+    <script>
+      // Executa o script após o carregamento da página
+      document.addEventListener("DOMContentLoaded", () => {
+        const toggle = document.getElementById("menu-toggle");
+        const mobileMenu = document.getElementById("mobile-menu");
+
+        toggle.addEventListener("click", () => {
+          mobileMenu.classList.toggle("show");
+        });
+      });
+    </script>
+
+    <!-- Script -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const wechatBtn = document.getElementById('wechat-btn');
+        const wechatPopup = document.getElementById('wechat-popup');
+
+        wechatBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isHidden = wechatPopup.classList.contains('hidden');
+          document.querySelectorAll('#wechat-popup').forEach(p => p.classList.add('hidden', 'opacity-0', 'scale-95'));
+          if (isHidden) {
+            wechatPopup.classList.remove('hidden');
+            setTimeout(() => {
+              wechatPopup.classList.remove('opacity-0', 'scale-95');
+            }, 10);
+          }
+        });
+
+        // Fecha ao clicar fora
+        document.addEventListener('click', (e) => {
+          if (!wechatBtn.contains(e.target) && !wechatPopup.contains(e.target)) {
+            wechatPopup.classList.add('opacity-0', 'scale-95');
+            setTimeout(() => {
+              wechatPopup.classList.add('hidden');
+            }, 200);
+          }
+        });
+      });
+    </script>
+
+
+
+   <!-- Script para sincronizar dados das commodities (adicione à sua página principal) -->
+<script>
+    // Função para carregar e exibir dados das commodities
+    function loadCommoditiesData() {
+        const savedData = localStorage.getItem('commoditiesData');
+        const defaultData = {
+            copper: { price: 10697.50, change: 0.32, color: 'green' },
+            aluminium: { price: 9870.00, change: 0.41, color: 'red' },
+            cobalt: { price: 3043.00, change: -1.47, color: 'red' },
+            lithium: { price: 2850.00, change: 0.85, color: 'green' }
+        };
+        
+        const data = savedData ? JSON.parse(savedData) : defaultData;
+        
+        // Atualizar exibição
+        updateCommoditiesDisplay(data);
+    }
+    
+    // Função para atualizar a exibição dos dados
+    function updateCommoditiesDisplay(data) {
+        // Mapeamento de cores para classes Tailwind
+        const colorClasses = {
+            green: 'text-green-400',
+            red: 'text-red-400',
+            blue: 'text-blue-400',
+            yellow: 'text-yellow-400'
+        };
+        
+        // Copper
+        document.getElementById('copperPriceDisplay').textContent = `$${data.copper.price.toFixed(2)}`;
+        document.getElementById('copperChangeDisplay').textContent = `${data.copper.change > 0 ? '+' : ''}${data.copper.change.toFixed(2)}%`;
+        document.getElementById('copperChangeDisplay').className = `text-base font-medium leading-normal ${colorClasses[data.copper.color] || 'text-green-400'}`;
+        
+        // Aluminium
+        document.getElementById('aluminiumPriceDisplay').textContent = `$${data.aluminium.price.toFixed(2)}`;
+        document.getElementById('aluminiumChangeDisplay').textContent = `${data.aluminium.change > 0 ? '+' : ''}${data.aluminium.change.toFixed(2)}%`;
+        document.getElementById('aluminiumChangeDisplay').className = `text-base font-medium leading-normal ${colorClasses[data.aluminium.color] || 'text-red-400'}`;
+        
+        // Cobalt
+        document.getElementById('cobaltPriceDisplay').textContent = `$${data.cobalt.price.toFixed(2)}`;
+        document.getElementById('cobaltChangeDisplay').textContent = `${data.cobalt.change > 0 ? '+' : ''}${data.cobalt.change.toFixed(2)}%`;
+        document.getElementById('cobaltChangeDisplay').className = `text-base font-medium leading-normal ${colorClasses[data.cobalt.color] || 'text-red-400'}`;
+        
+        // Lithium
+        document.getElementById('lithiumPriceDisplay').textContent = `$${data.lithium.price.toFixed(2)}`;
+        document.getElementById('lithiumChangeDisplay').textContent = `${data.lithium.change > 0 ? '+' : ''}${data.lithium.change.toFixed(2)}%`;
+        document.getElementById('lithiumChangeDisplay').className = `text-base font-medium leading-normal ${colorClasses[data.lithium.color] || 'text-green-400'}`;
+    }
+    
+    // Adicionar IDs aos elementos HTML (se ainda não tiverem)
+    document.addEventListener('DOMContentLoaded', function() {
+        // Garantir que os elementos tenham IDs
+        const commodityCards = document.querySelectorAll('.flex.min-w-\\[200px\\].flex-1.flex-col');
+        
+        commodityCards.forEach((card, index) => {
+            const priceElement = card.querySelector('.text-white.text-3xl');
+            const changeElement = card.querySelector('.text-base.font-medium.leading-normal:last-child');
+            
+            if (index === 0 && !priceElement.id) {
+                priceElement.id = 'copperPriceDisplay';
+                changeElement.id = 'copperChangeDisplay';
+            } else if (index === 1 && !priceElement.id) {
+                priceElement.id = 'aluminiumPriceDisplay';
+                changeElement.id = 'aluminiumChangeDisplay';
+            } else if (index === 2 && !priceElement.id) {
+                priceElement.id = 'cobaltPriceDisplay';
+                changeElement.id = 'cobaltChangeDisplay';
+            } else if (index === 3 && !priceElement.id) {
+                priceElement.id = 'lithiumPriceDisplay';
+                changeElement.id = 'lithiumChangeDisplay';
+            }
+        });
+        
+        // Carregar dados iniciais
+        loadCommoditiesData();
+        
+        // Escutar por mudanças no localStorage (para atualização em tempo real)
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'commoditiesData') {
+                loadCommoditiesData();
+            }
+        });
+        
+        // Verificar por mudanças periodicamente (para mesma aba)
+        setInterval(loadCommoditiesData, 1000);
+    });
+</script>
+
+
+
+
+<!-- Script para sincronizar dados das commodities (adicione à sua página principal) -->
+<script>
+    // Função para carregar e exibir dados das commodities
+    function loadCommoditiesData() {
+        const savedData = localStorage.getItem('commoditiesData');
+        const defaultData = {
+            copper: { price: 10697.50, change: 0.32 },
+            aluminium: { price: 9870.00, change: 0.41 },
+            cobalt: { price: 3043.00, change: -1.47 },
+            lithium: { price: 2850.00, change: 0.85 }
+        };
+        
+        const data = savedData ? JSON.parse(savedData) : defaultData;
+        
+        // Atualizar exibição
+        updateCommoditiesDisplay(data);
+    }
+    
+    // Função para determinar a classe de cor baseada no valor
+    function getChangeColorClass(value) {
+        if (value > 0) return 'text-green-400';
+        if (value < 0) return 'text-red-400';
+        return 'text-blue-400';
+    }
+    
+    // Função para formatar a porcentagem
+    function formatPercentage(value) {
+        const sign = value >= 0 ? '+' : '';
+        return `${sign}${value.toFixed(2)}%`;
+    }
+    
+    // Função para atualizar a exibição dos dados
+    function updateCommoditiesDisplay(data) {
+        // Copper
+        const copperPriceElement = document.getElementById('copperPriceDisplay');
+        const copperChangeElement = document.getElementById('copperChangeDisplay');
+        
+        if (copperPriceElement && copperChangeElement) {
+            copperPriceElement.textContent = `$${data.copper.price.toFixed(2)}`;
+            copperChangeElement.textContent = formatPercentage(data.copper.change);
+            copperChangeElement.className = `text-base font-medium leading-normal ${getChangeColorClass(data.copper.change)}`;
+        }
+        
+        // Aluminium
+        const aluminiumPriceElement = document.getElementById('aluminiumPriceDisplay');
+        const aluminiumChangeElement = document.getElementById('aluminiumChangeDisplay');
+        
+        if (aluminiumPriceElement && aluminiumChangeElement) {
+            aluminiumPriceElement.textContent = `$${data.aluminium.price.toFixed(2)}`;
+            aluminiumChangeElement.textContent = formatPercentage(data.aluminium.change);
+            aluminiumChangeElement.className = `text-base font-medium leading-normal ${getChangeColorClass(data.aluminium.change)}`;
+        }
+        
+        // Cobalt
+        const cobaltPriceElement = document.getElementById('cobaltPriceDisplay');
+        const cobaltChangeElement = document.getElementById('cobaltChangeDisplay');
+        
+        if (cobaltPriceElement && cobaltChangeElement) {
+            cobaltPriceElement.textContent = `$${data.cobalt.price.toFixed(2)}`;
+            cobaltChangeElement.textContent = formatPercentage(data.cobalt.change);
+            cobaltChangeElement.className = `text-base font-medium leading-normal ${getChangeColorClass(data.cobalt.change)}`;
+        }
+        
+        // Lithium
+        const lithiumPriceElement = document.getElementById('lithiumPriceDisplay');
+        const lithiumChangeElement = document.getElementById('lithiumChangeDisplay');
+        
+        if (lithiumPriceElement && lithiumChangeElement) {
+            lithiumPriceElement.textContent = `$${data.lithium.price.toFixed(2)}`;
+            lithiumChangeElement.textContent = formatPercentage(data.lithium.change);
+            lithiumChangeElement.className = `text-base font-medium leading-normal ${getChangeColorClass(data.lithium.change)}`;
+        }
+    }
+    
+    // Adicionar IDs aos elementos HTML (se ainda não tiverem)
+    document.addEventListener('DOMContentLoaded', function() {
+        // Garantir que os elementos tenham IDs
+        const commodityCards = document.querySelectorAll('.flex.min-w-\\[200px\\].flex-1.flex-col');
+        
+        commodityCards.forEach((card, index) => {
+            const priceElement = card.querySelector('.text-white.text-3xl');
+            const changeElement = card.querySelector('.text-base.font-medium.leading-normal:last-child');
+            
+            if (index === 0 && !priceElement.id) {
+                priceElement.id = 'copperPriceDisplay';
+                changeElement.id = 'copperChangeDisplay';
+            } else if (index === 1 && !priceElement.id) {
+                priceElement.id = 'aluminiumPriceDisplay';
+                changeElement.id = 'aluminiumChangeDisplay';
+            } else if (index === 2 && !priceElement.id) {
+                priceElement.id = 'cobaltPriceDisplay';
+                changeElement.id = 'cobaltChangeDisplay';
+            } else if (index === 3 && !priceElement.id) {
+                priceElement.id = 'lithiumPriceDisplay';
+                changeElement.id = 'lithiumChangeDisplay';
+            }
+        });
+        
+        // Carregar dados iniciais
+        loadCommoditiesData();
+        
+        // Escutar por mudanças no localStorage (para atualização em tempo real)
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'commoditiesData') {
+                loadCommoditiesData();
+            }
+        });
+        
+        // Verificar por mudanças periodicamente (para mesma aba)
+        setInterval(loadCommoditiesData, 1000);
+    });
+</script>
+
+
+
+
+
+  </head>
+
+  <body
+    class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark font-body"
+  >
+
+    <header class="sticky top-0 z-50 flex w-full items-center justify-center bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-border-light dark:border-border-dark">
+      <div class="flex items-center justify-between w-full max-w-6xl px-4 py-4">
+        <!-- Logo -->
+        <div class="flex items-center gap-3 text-text-light dark:text-text-dark">
+          <img 
+            src="logo2.png" 
+            alt="Logotipo KHUMOTONE" 
+            class="h-8 w-auto object-contain"
+          >
+        </div>
+
+        <!-- Botão hamburguer -->
+        <button id="menu-toggle" class="md:hidden flex flex-col gap-1.5 cursor-pointer" aria-label="Abrir menu">
+          <span class="block w-6 h-0.5 bg-text-light dark:bg-text-dark"></span>
+          <span class="block w-6 h-0.5 bg-text-light dark:bg-text-dark"></span>
+          <span class="block w-6 h-0.5 bg-text-light dark:bg-text-dark"></span>
+        </button>
+
+        <!-- Menu de navegação (desktop) -->
+        <nav class="hidden md:flex items-center gap-8">
+          <a class="text-sm font-semibold nav-link" href="index.html">Home</a>
+          <a class="text-sm font-semibold nav-link" href="sobre.html">About Us</a>
+          <a class="text-sm font-semibold nav-link" href="contacto.html">Contact</a>
+          <a class="text-sm font-semibold nav-link" href="contratos.html">documents</a>
+          
+        </nav>
+
+        <!-- Container para linha e seletor de idioma -->
+        <div class="flex items-center gap-4">
+          <!-- Linha divisória (apenas desktop) -->
+          <div class="hidden md:block h-6 w-px bg-border-light dark:bg-border-dark"></div>
+          
+          <!-- Seletor de idioma -->
+          <div class="relative" x-data="{ open: false, currentLanguage: 'EN' }">
+            <button @click="open = !open" class="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors" type="button">
+              <!-- Ícone de linguagem protegido -->
+              <span class="material-symbols-outlined !text-xl notranslate" translate="no">language</span>
+              <span x-text="currentLanguage"></span>
+              <!-- Ícone expandir protegido -->
+              <span class="material-symbols-outlined !text-xl transition-transform notranslate" translate="no" :class="{ 'rotate-180': open }">expand_more</span>
+            </button>
+            
+            <div x-show="open" 
+                x-transition
+                @click.outside="open = false"
+                class="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-background-light dark:bg-background-dark shadow-lg ring-1 ring-black dark:ring-white ring-opacity-5 dark:ring-opacity-10 focus:outline-none py-1 z-50"
+                x-cloak>
+              <a class="block px-4 py-2 text-sm text-text-light dark:text-text-dark hover:bg-gray-100 dark:hover:bg-gray-800/50 notranslate" translate="no" href="#" @click="changeLanguage('pt', 'PT'); open = false;">Português</a>
+              <a class="block px-4 py-2 text-sm text-text-light dark:text-text-dark hover:bg-gray-100 dark:hover:bg-gray-800/50 notranslate" translate="no" href="#" @click="changeLanguage('fr', 'FR'); open = false;">Français</a>
+              <a class="block px-4 py-2 text-sm text-text-light dark:text-text-dark hover:bg-gray-100 dark:hover:bg-gray-800/50 notranslate" translate="no" href="#" @click="changeLanguage('en', 'EN'); open = false;">English</a>
+              <a class="block px-4 py-2 text-sm text-text-light dark:text-text-dark hover:bg-gray-100 dark:hover:bg-gray-800/50 notranslate" translate="no" href="#" @click="changeLanguage('es', 'ES'); open = false;">Español</a>
+              <a class="block px-4 py-2 text-sm text-text-light dark:text:text-text-dark hover:bg-gray-100 dark:hover:bg-gray-800/50 notranslate" translate="no" href="#" @click="changeLanguage('zh-CN', '中文'); open = false;">中文</a>
+              <a class="block px-4 py-2 text-sm text-text-light dark:text-text-dark hover:bg-gray-100 dark:hover:bg-gray-800/50 notranslate" translate="no" href="#" @click="changeLanguage('ar', 'العربية'); open = false;">العربية</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Widget do Google Translate -->
+    <div id="google_translate_element" style="position:absolute;top:0;left:0;z-index:999999;opacity:0;width:1px;height:1px;overflow:hidden;"></div>
+
+    
+    <!-- Menu mobile -->
+    <nav id="mobile-menu" class="hidden flex-col items-center gap-4 bg-background-light dark:bg-background-dark border-t border-border-light dark:border-border-dark py-4 md:hidden">
+      <a class="text-sm font-semibold nav-link" href="index.html">Home</a>
+      <a class="text-sm font-semibold nav-link" href="sobre.html">About Us</a>
+      <a class="text-sm font-semibold nav-link" href="contacto.html">Contact</a>
+      <a class="text-sm font-semibold nav-link" href="contratos.html">documents</a>
+      
+    </nav>
+
+    <div
+      class="relative flex w-full flex-col group/design-root overflow-x-hidden"
+    >
+      <div class="layout-container flex h-full grow flex-col">
+        <main class="flex flex-col items-center">
+          <section class="w-full">
+            <div
+              class="relative flex min-h-[calc(100vh-69px)] flex-col items-center justify-center bg-cover bg-center bg-no-repeat p-4 overflow-hidden"
+            >
+              <!-- Vídeo de fundo -->
+              <video autoplay muted loop class="video-background">
+                <source src="2.mp4" type="video/mp4">
+                Seu navegador não suporta vídeos HTML5.
+              </video>
+              
+              <!-- Overlay escuro para melhor legibilidade -->
+              <div class="video-overlay"></div>
+              
+              <div class="flex flex-col gap-6 text-center max-w-4xl relative z-10">
+                <h1
+                  class="text-white text-4xl md:text-6xl font-black tracking-tight font-heading"
+                >
+                  Commodities Long-term Contracts.
+                </h1>
+                <div class="flex flex-wrap justify-center gap-4">
+                  <div
+                    class="flex min-w-[200px] flex-1 flex-col gap-2 rounded-lg p-6 border border-white/20 bg-black/30 backdrop-blur-sm"
+                  >
+                    <p
+                      class="text-white/90 text-base font-medium leading-normal"
+                    >
+                      LME Copper
+                    </p>
+                    <p class="text-white text-3xl font-bold leading-tight">
+                      $10697.50
+                    </p>
+                    <p
+                      class="text-green-400 text-base font-medium leading-normal"
+                    >
+                      0.32%
+                    </p>
+                  </div>
+                  <div
+                    class="flex min-w-[200px] flex-1 flex-col gap-2 rounded-lg p-6 border border-white/20 bg-black/30 backdrop-blur-sm"
+                  >
+                    <p
+                      class="text-white/90 text-base font-medium leading-normal"
+                    >
+                      LME Aluminium
+                    </p>
+                    <p class="text-white text-3xl font-bold leading-tight">
+                      $9870.00
+                    </p>
+                    <p
+                      class="text-red-400 text-base font-medium leading-normal"
+                    >
+                      0.41%
+                    </p>
+                  </div>
+                  <div
+                    class="flex min-w-[200px] flex-1 flex-col gap-2 rounded-lg p-6 border border-white/20 bg-black/30 backdrop-blur-sm"
+                  >
+                    <p
+                      class="text-white/90 text-base font-medium leading-normal"
+                    >
+                      LME Cobalt
+                    </p>
+                    <p class="text-white text-3xl font-bold leading-tight">
+                      $3043.00
+                    </p>
+                    <p
+                      class="text-red-400 text-base font-medium leading-normal"
+                    >
+                      -1.47%
+                    </p>
+                  </div>
+                  <div
+                    class="flex min-w-[200px] flex-1 flex-col gap-2 rounded-lg p-6 border border-white/20 bg-black/30 backdrop-blur-sm"
+                  >
+                    <p
+                      class="text-white/90 text-base font-medium leading-normal"
+                    >
+                      LME Lithium
+                    </p>
+                    <p class="text-white text-3xl font-bold leading-tight">
+                      $2850.00
+                    </p>
+                    <p
+                      class="text-green-400 text-base font-medium leading-normal"
+                    >
+                      0.85%
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section class="w-full max-w-6xl py-16 md:py-24 px-4" id="sobre-nos">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+              <div class="flex flex-col gap-4">
+                <h2
+                  class="text-3xl font-bold font-heading text-text-light dark:text-text-dark"
+                >
+                  About KHUMOTONE
+                </h2>
+                <p class="text-base font-normal leading-relaxed text-secondary">
+                  KHUMOTONE is a leader in the supply of copper sheets and mineral 
+                  commodities, ensuring safety and efficiency from origin to delivery. 
+                  Our market expertise allows us to offer products of the highest
+                   quality with unmatched service, building long-lasting partnerships 
+                   based on trust and operational excellence.
+                </p>
+                <p class="text-base font-normal leading-relaxed text-secondary">
+                  Our commitment is to transparency and punctuality, ensuring that 
+                  every transaction meets the highest international standards of 
+                  quality and compliance.
+                </p>
+              </div>
+              <div>
+                <img
+                  alt="Stacks of copper plates"
+                  class="rounded-lg object-cover w-full h-80"
+                  data-alt="Stacks of gleaming copper plates in a warehouse, reflecting light."
+                  src="1.jpg"
+                />
+              </div>
+            </div>
+          </section>
+          <section
+            class="w-full py-16 md:py-24 px-4"
+            id="pilares"
+            style="background-color: #f7f7f7"
+            id="pilares"
+          >
+            <div class="max-w-6xl mx-auto">
+              <div class="text-center mb-12">
+                <h2
+                  class="text-3xl font-bold font-heading text-text-light dark:text-text-dark"
+                >
+                  Our Pillars
+                </h2>
+                <p class="text-secondary mt-2 max-w-2xl mx-auto">
+                  The principles that guide each of our operations and decisions.
+                </p>
+              </div>
+              <div class="grid md:grid-cols-3 gap-8">
+                <div
+                  class="flex flex-col items-center text-center p-6 border border-border-light dark:border-border-dark rounded-lg bg-background-light dark:bg-background-dark"
+                >
+                  <div
+                    class="flex items-center justify-center h-12 w-12 rounded-full bg-[#0072FF]/20 text-[#0072FF] mb-4 notranslate"
+                    translate="no"
+                  >
+                    <span class="material-symbols-outlined">rocket_launch</span>
+                  </div>
+                  <h3 class="text-xl font-bold font-heading mb-2">Mission</h3>
+                  <p class="text-secondary leading-relaxed">
+                    To supply mineral commodities with maximum safety and efficiency, 
+                    creating sustainable value for our clients and partners through a 
+                    reliable and transparent supply chain.
+                  </p>
+                </div>
+
+                <div
+                  class="flex flex-col items-center text-center p-6 border border-border-light dark:border-border-dark rounded-lg bg-background-light dark:bg-background-dark"
+                >
+                  <div
+                    class="flex items-center justify-center h-12 w-12 rounded-full bg-[#0072FF]/20 text-[#0072FF] mb-4 notranslate"
+                    translate="no"
+                  >
+                    <span class="material-symbols-outlined">visibility</span>
+                  </div>
+                  <h3 class="text-xl font-bold font-heading mb-2">Vision</h3>
+                  <p class="text-secondary leading-relaxed">
+                    To be the global benchmark in commodity supply, recognized for operational 
+                    excellence, innovation, and a commitment to ethical and responsible business 
+                    practices.
+                  </p>
+                </div>
+
+                <div
+                  class="flex flex-col items-center text-center p-6 border border-border-light dark:border-border-dark rounded-lg bg-background-light dark:bg-background-dark"
+                >
+                  <div
+                    class="flex items-center justify-center h-12 w-12 rounded-full bg-[#0072FF]/20 text-[#0072FF] mb-4 notranslate"
+                    translate="no"
+                  >
+                    <span class="material-symbols-outlined">workspace_premium</span>
+                  </div>
+                  <h3 class="text-xl font-bold font-heading mb-2">Values</h3>
+                  <p class="text-secondary leading-relaxed">
+                    Integrity in all actions, commitment to quality, customer focus, 
+                    and social and environmental responsibility are the foundations 
+                    that support our organization and our partnerships.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section class="w-full max-w-6xl py-16 md:py-24 px-4" id="operacoes">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+              <div class="order-2 md:order-1">
+                <img
+                  alt="Cargo ship at port"
+                  class="rounded-lg object-cover w-full h-80"
+                  data-alt="A large cargo ship being loaded with containers at an industrial port at sunset."
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhaxKt_nc3Vp8q6D-UIDc_Q1b4HXV2Sfc7yMXZOG8qDEcAwJu9rdcbAgztTxPdXhJdz60_dL0_rcYbsRUEnmuBrPZlEy9uGSFmQt0ZdU2AzLoznJhrkXnEwDLovgHvSCHp4mjC3-33XzZpoPESVJM6EcoXDO0UjNRz4rBAASUofQGv7-m9Et5-0EIQgvxujyOpITC8iZEAbFh2t1VE_Lre02Qc2Dt2VHkXegXeQ7QpvGnaqDArhMiy-aYsAWGGGNsOzMJvXdnIBRiM"
+                />
+              </div>
+              <div class="flex flex-col gap-4 order-1 md:order-2">
+                <h2
+                  class="text-3xl font-bold font-heading text-text-light dark:text-text-dark"
+                >
+                  Efficient and Safe Operations
+                </h2>
+                <p class="text-base font-normal leading-relaxed text-secondary">
+                  Our logistics process is meticulously planned to ensure the integrity 
+                  and punctuality of every shipment. From extraction at the source, 
+                  through processing and transportation, to arrival at the final 
+                  destination, we implement strict quality and safety controls.
+                </p>
+                <p class="text-base font-normal leading-relaxed text-secondary">
+                  We use cutting-edge technology for tracking and inventory management, providing our clients with complete visibility and peace of mind throughout the entire supply process.
+                </p>
+              </div>
+            </div>
+          </section>
+          <section
+            class="w-full py-16 md:py-24 px-4"
+            id="pilares"
+            style="background-color:#f5f5f5;"
+          >
+            <div class="max-w-4xl mx-auto text-center px-4">
+              <h2
+                class="text-3xl font-bold font-heading text-text-light dark:text-text-dark"
+              >
+                Ready to secure your supply?
+              </h2>
+              <p class="mt-4 text-lg text-secondary">
+                Get in touch with our team of specialists and discover how we can optimize your supply chain with high-quality products and exceptional service.
+              </p>
+              <button
+                onclick="window.location.href='contacto.html';"
+                class="mt-8 flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 text-white text-base font-bold leading-normal tracking-[0.015em] mx-auto hover:opacity-90 transition-opacity"
+                style="background-color: rgb(0, 114, 255)"
+              >
+                <span class="truncate text-white">Request a Quote</span>
+              </button>
+            </div>
+          </section>
+        </main>
+        <footer class="w-full bg-gray-100 dark:bg-gray-800/30 border-t border-border-light dark:border-border-dark">
+          <div class="max-w-6xl mx-auto py-8 px-4 flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-4">
+            <p class="text-sm text-[#71797E]">© 2025 KHUMOTONE. All rights reserved.</p>
+            <div class="flex items-center gap-4">
+              <a class="text-sm text-[#71797E] hover:text-primary transition-colors" href="termos.html">Terms of Service</a>
+              <a class="text-sm text-[#71797E] hover:text-primary transition-colors" href="politicas.html">Privacy Policy</a>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+    
+    <!-- Botões flutuantes -->
+    <div class="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
+      <!-- WhatsApp -->
+      <a
+        href="https://wa.me/+244926849260"
+        target="_blank"
+        aria-label="Contact us on WhatsApp"
+        class="flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-white shadow-lg transition-transform hover:scale-110"
+      >
+        <i class="fa-brands fa-whatsapp text-3xl"></i>
+      </a>
+
+      <!-- WeChat Container -->
+      <div class="relative inline-block">
+        <!-- Botão do WeChat -->
+        <button
+          id="wechat-btn"
+          type="button"
+          aria-label="Contact us on WeChat"
+          class="flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-white shadow-lg transition-transform hover:scale-110"
+        >
+          <i class="fa-brands fa-weixin text-3xl"></i>
+        </button>
+
+        <!-- Popup com a imagem -->
+        <div
+          id="wechat-popup"
+          class="hidden absolute bottom-16 left-0 translate-x-[-80%] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl rounded-xl p-3 w-56 text-center transition-all duration-300 opacity-0 scale-95"
+        >
+          <img
+            src="qr.jpg"
+            alt="WeChat QR Code"
+            class="rounded-lg mx-auto mb-2"
+          />
+          <p class="text-sm text-gray-700 dark:text-gray-300">Scan to Chat</p>
+        </div>
+      </div>
+    </div>
+  </body>
+
+</html>
